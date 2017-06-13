@@ -280,7 +280,9 @@ NodePtr rbt_delete_fixup(RBTPtr self, NodePtr tree, NodePtr n) {
 	 if (tree == NULL) return;
 	 else {
 		 rbt_inorder(self, tree->left);
-		 printf("%d\n", tree->val);
+		 printf("%d", tree->val);
+		 if (tree->color == red) printf("red\n");
+		 else if (tree->color == black) printf("black\n");
 		 rbt_inorder(self, tree->right);
 	 }
  }
@@ -330,51 +332,69 @@ NodePtr rbt_delete_fixup(RBTPtr self, NodePtr tree, NodePtr n) {
  }
 
 int main(void) {
-		FILE *fpile, *fp;
-		RBTPtr self = rbt_alloc();
-		NodePtr tree, val;
-		tree = nil();
-		val = node_alloc(0);
-		int data;
-		NodePtr m = node_alloc(0);
+	FILE *fpile, *fp;
+	RBTPtr self = rbt_alloc();
+	NodePtr tree, val;
+	tree = nil();
+	val = node_alloc(0);
+	int data;
+	NodePtr m = node_alloc(0);
 
-		fpile = fopen("input.txt", "r");
-		if (fpile != NULL) {
-			while (fscanf(fpile, "%d", &data) != EOF) {
-				if (data > 0) {
-					m->val = data;
-					rbt_insert(self, tree, m);
-				}
-				else if (data < 0) {
+	char name[100];
+	printf("input file name = ");
+	scanf("%s", name);
+	int ins = 0;
+	int del = 0;
+	int miss = 0;
+
+	fpile = fopen(name, "r");
+	if (fpile != NULL) {
+		while (fscanf(fpile, "%d", &data) != EOF) {
+			if (data > 0) {
+				m->val = data;
+				rbt_insert(self, tree, m);
+				ins += 1;
+			}
+			else if (data < 0) {
+				data = data*-1;
+				val = rbt_search(self, tree, data);
+				if (val == nil()) {
+					fp = fopen("None.txt", "w");
 					data = data*-1;
-					val = rbt_search(self, tree, data);
-					if (val == nil()) {
-						fp = fopen("None.txt", "w");
-						data = data*-1;
-						fclose(fp);
-					}
-					else {
-						NodePtr x = node_alloc(0);
-						x->val = data;
-						rbt_delete(self, tree, x);
-					}
-
+					fclose(fp);
+					miss += 1;
 				}
-				else if (data == 0) break;
-			}
-			if (data == 0) {
-				printf("total = ");
-				printf("%d\n", get_node_count(self, tree));
-				printf("nb = ");
-				printf("%d\n", get_blacknode_count(self, tree));
-				printf("bh = ");
-				printf("%d\n", get_bh(self, tree));
-				rbt_inorder(self, tree);
-			}
+				else {
+					NodePtr x = node_alloc(0);
+					x->val = data;
+					rbt_delete(self, tree, x);
+					del += 1;
+				}
 
+			}
+			else if (data == 0) break;
 		}
-		else if (fpile == NULL) printf("There is no input.txt\n");
-		fclose(fpile);
+		if (data == 0) {
+			printf("filename = ");
+			printf("%s\n", name);
+			printf("total = ");
+			printf("%d\n", get_node_count(self, tree));
+			printf("insert = ");
+			printf("%d\n", ins);
+			printf("deleted = ");
+			printf("%d\n", del);
+			printf("miss = ");
+			printf("%d\n", miss);
+			printf("nb = ");
+			printf("%d\n", get_blacknode_count(self, tree));
+			printf("bh = ");
+			printf("%d\n", get_bh(self, tree));
+			rbt_inorder(self, tree);
+		}
 
-		return 0;
+	}
+	else if (fpile == NULL) printf("There is no input.txt\n");
+	fclose(fpile);
+
+	return 0;
 }
